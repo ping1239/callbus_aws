@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.7'
+          python-version: '3.13'
 
       - name: Install EB CLI
         run: |
@@ -35,10 +35,10 @@ jobs:
           cat > .elasticbeanstalk/config.yml <<'EOF'
           branch-defaults:
             master:
-              environment: ${ENV_NAME}
+              environment: ${EB_ENV_NAME}
           global:
-            application_name: ${APP_NAME}
-            default_platform: Python 3.13.7
+            application_name: ${EB_APP_NAME}
+            default_platform: Python 3.13
             default_region: ${AWS_REGION}
             sc: git
           EOF
