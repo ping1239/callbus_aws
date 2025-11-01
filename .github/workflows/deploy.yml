@@ -53,3 +53,8 @@ jobs:
       - name: Deploy to EB
         run: |
           eb deploy --staged --timeout 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+            python-version: '3.13.7'  # 또는 EB 플랫폼과 가장 가까운 3.13.x 버전
