@@ -35,11 +35,11 @@ jobs:
           cat > .elasticbeanstalk/config.yml <<'EOF'
           branch-defaults:
             master:
-              environment: ${EB_ENV_NAME}
+              environment: ${{secrets.EB_ENV_NAME}}
           global:
-            application_name: ${EB_APP_NAME}
+            application_name: ${{secrets.EB_APP_NAME}}
             default_platform: Python 3.13
-            default_region: ${AWS_REGION}
+            default_region: ${{secrets.AWS_REGION}}
             sc: git
           EOF
 
