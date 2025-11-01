@@ -34,14 +34,17 @@ jobs:
           mkdir -p .elasticbeanstalk
           cat > .elasticbeanstalk/config.yml <<'EOF'
           branch-defaults:
-            main:
+            master:
               environment: ${ENV_NAME}
           global:
             application_name: ${APP_NAME}
-            default_platform: Python 3.11
+            default_platform: Python 3.13.7
             default_region: ${AWS_REGION}
             sc: git
           EOF
+
+          echo "----- Generated EB config.yml -----"
+          cat .elasticbeanstalk/config.yml
         env:
           APP_NAME: ${{ secrets.EB_APP_NAME }}
           ENV_NAME: ${{ secrets.EB_ENV_NAME }}
