@@ -2,28 +2,20 @@ name: Deploy to Elastic Beanstalk
 
 on:
   push:
-    branches: [ master ]
-  workflow_dispatch: {}   # 수동 실행 버튼도 허용
+    branches: [ master ] 
+  workflow_dispatch: {}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
+          python-version: '3.13.7'
 
       - name: Install EB CLI
         run: |
@@ -37,24 +29,30 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 최초 실행 시 'eb init' 메타데이터가 필요.
-      # .elasticbeanstalk/config.yml 없을 경우엔 아래 자동 init 수행
-      - name: EB init if needed
+      - name: Write EB config.yml
         run: |
-          if [ ! -f .elasticbeanstalk/config.yml ]; then
-            eb init "${{ secrets.EB_APP_NAME }}" --platform "Python 3.11" --region "${{ secrets.AWS_REGION }}"
-          fi
-          eb use "${{ secrets.EB_ENV_NAME }}"
+          mkdir -p .elasticbeanstalk
+          cat > .elasticbeanstalk/config.yml <<'EOF'
+          branch-defaults:
+            main:
+              environment: ${ENV_NAME}
+          global:
+            application_name: ${APP_NAME}
+            default_platform: Python 3.11
+            default_region: ${AWS_REGION}
+            sc: git
+          EOF
+        env:
+          APP_NAME: ${{ secrets.EB_APP_NAME }}
+          ENV_NAME: ${{ secrets.EB_ENV_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      # (선택) 불필요 파일 제외 (레포에 .ebignore 넣으면 EB CLI가 자동 인식)
-      # - name: Show EB ignore
-      #   run: cat .ebignore || true
+      - name: Set git identity (EB CLI sometimes needs it)
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
 
       - name: Deploy to EB
         run: |
-          eb deploy --staged --timeout 20
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-            python-version: '3.13.7'  # 또는 EB 플랫폼과 가장 가까운 3.13.x 버전
+          eb use "${{ secrets.EB_ENV_NAME }}"
+          eb deploy --staged --timeout 40   # ← 40분로 여유
