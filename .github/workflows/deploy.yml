@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.13.7'
 
       - name: Install EB CLI
         run: |
@@ -38,7 +38,7 @@ jobs:
               environment: ${{secrets.EB_ENV_NAME}}
           global:
             application_name: ${{secrets.EB_APP_NAME}}
-            default_platform: Python 3.13
+            default_platform: Python 3.13.7
             default_region: ${{secrets.AWS_REGION}}
             sc: git
           EOF

@@ -6,6 +6,10 @@ from pathlib import Path
 app = FastAPI()
 
 @app.get("/")
+def health():
+    return {"ok": True}
+
+@app.get("/")
 def index():
     path = Path(__file__).parent / "index.html" 
     html_content = path.read_text(encoding = "utf-8")
